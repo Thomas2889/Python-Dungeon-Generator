@@ -1,0 +1,80 @@
+def GenStep1():
+    usedStarts = [0, _MAP_SIZE[0], _MAP_SIZE[1]]
+    for x in range(0, random.randrange(10, 21)):
+        DrawRoomDivider(usedStarts)
+    print(usedStarts)
+
+
+def DrawRoomDivider(usedStarts):
+    # pick whether we go horizontal or vertical
+    orientation = random.randrange(0, 2) # 0 vertical / 1 horizontal
+
+    # pick how far along to start from
+    tries = 0
+    limit = 10
+    while True:
+        if tries == 15:
+            print("temp")
+            tries = 0
+            limit -= 1
+
+        startFrom = (random.randrange(1, _MAP_SIZE[1]), random.randrange(1, _MAP_SIZE[0]))[orientation == 0]
+
+        regen = False
+        for x in usedStarts:
+            if startFrom - x <= limit and startFrom > x:
+                regen = True
+            elif x - startFrom <= limit and x > startFrom:
+                regen = True
+
+        if not regen:
+            break
+
+        tries += 1
+
+    usedStarts.append(startFrom)
+
+    # set up the cordCursor and set drawing to false for later
+    drawing = True
+    cursor = cordCursor()
+
+    TopLeft = (False, True)[random.randrange(0, 2) == 0]
+
+    if orientation == 0:
+        cursor.x = startFrom
+        cursor.y = (_MAP_SIZE[1]-1, 0)[TopLeft]
+    else:
+        cursor.x = (_MAP_SIZE[0]-1, 0)[TopLeft]
+        cursor.y = startFrom
+
+    # Start drawing
+    while True:
+        if orientation == 0:
+            cursor.y = (cursor.y - 1, cursor.y + 1)[TopLeft]
+            if cursor.tileInfo() == "wall":
+                # found a wall, first lets see if its at the edge of the map
+                if cursor.y == _MAP_SIZE[1]-1 or cursor.y == 0:
+                    # it was so its time to leave the while loop, the line is done.
+                    break
+                # this wall wasn't at the end of the map so now decide if it stops the cursor from drawing or not
+                rand = random.randrange(0, 2)
+                if rand == 0:
+                    drawing = (True, False)[drawing]
+            # after handling any wall collisions we draw (if we are)
+            if drawing:
+                cursor.draw("wall")
+        else:
+            # do the same but horizontally
+            cursor.x = (cursor.x - 1, cursor.x + 1)[TopLeft]
+            if cursor.tileInfo() == "wall":
+                # found a wall, first lets see if its at the edge of the map
+                if cursor.x == _MAP_SIZE[0]-1 or cursor.x == 0:
+                    # it was so its time to leave the while loop, the line is done.
+                    break
+                # this wall wasn't at the end of the map so now decide if it stops the cursor from drawing or not
+                rand = random.randrange(0, 2)
+                if rand == 0:
+                    drawing = (True, False)[drawing]
+            # after handling any wall collisions we draw (if we are)
+            if drawing:
+                cursor.draw("wall")
